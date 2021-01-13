@@ -2,19 +2,46 @@ plugins {
 	id 'org.springframework.boot' version '2.4.1'
 	id 'io.spring.dependency-management' version '1.0.10.RELEASE'
 	id 'java'
+	id 'application'
+	id 'eclipse'
 }
 
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
 group = 'com.example'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
 
 repositories {
-	mavenCentral()
+	jcenter()
 }
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	
+	implementation( 'org.apache.commons:commons-lang3:3.7'
+	, 'commons-io:commons-io:2.8.0')
+
+    compileOnly 'org.projectlombok:lombok:1.18.4'
+    annotationProcessor "org.projectlombok:lombok:1.18.4"
+    testCompileOnly 'org.projectlombok:lombok:1.18.4'
+    testAnnotationProcessor "org.projectlombok:lombok:1.18.4"
+}
+
+application {
+    mainClassName = 'com.example.demo.Execute'
+}
+
+jar {
+    manifest {
+        attributes('Implementation-Title': 'DeployZip'
+                 , 'Implementation-Version': 0.01 
+                 , 'Main-Class': 'com.example.demo.Execute')
+    }
+    from configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
 }
 
 test {

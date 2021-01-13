@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+<configuration>
+
+  <property name="logDir" value="./log/" />
+  <property name="LOG_FILE" value="errorlog" />
+  
+  <!-- 1.Spring Bootデフォルト設定読込 -->
+  <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+  <!-- <include resource="org/springframework/boot/logging/logback/console-appender.xml" /> -->
+  <!-- 2.コンソールログ定義 -->
+  <appender name="APPLICATION_CONSOLE_LOG" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <!-- <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{jobid}] ${LOG_LEVEL_PATTERN:-%5p} %logger : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern> -->
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS,Asia/Tokyo} [%X{jobid}] ${LOG_LEVEL_PATTERN:-%5p} %logger : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+      <charset>utf8</charset>
+    </encoder>
+  </appender>
+ <!--
+ 	3.環境によってログファイル名を取得する
+ 	下記定義で環境依存を差し替えたら、再修正する。
+	 	spring.profiles.active
+	 	 spring.profiles
+  <property name="APP_LOG_FILENAME" value="C:/ARM/log/nail_applog.log"/>
+ -->
+ <!--
+ 	＜ログの課題＞
+ 	結合試験以降は、ログファイルをAWSに出力します。
+ 	アクティブなログファイルは、ＥＣ２に出力するが、定期的にCloudWatchで正規の保存場所へ移動する。
+ 	それを踏まえると、ファイル名、ローテーションするタイミング（サイズ or 日）を確認する必要あり。
+  -->
+  <!-- 4.デフォルトのログファイルの定義 -->
+  <!--
+  <timestamp key="bySecond" datePattern="yyyyMMdd_HHmmssSSS"/>
+  <file>/ARM/log/mail_applog.${bySecond}.log</file>
+  <file>${logDir}${LOG_FILE}.${bySecond}.log</file>
+   -->
+  <appender name="APPLICATION_LOG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+    <file>${logDir}${LOG_FILE}.log</file>
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+    <!--
+      <fileNamePattern>${APP_LOG_FILENAME}_%d{HHmmssSSS}.log</fileNamePattern>
+      <maxHistory>60</maxHistory>
+     -->
+      <fileNamePattern>${logDir}${LOG_FILE}.%d{yyyyMMdd}.gz</fileNamePattern>
+      <maxHistory>30</maxHistory>
+      <cleanHistoryOnStart>true</cleanHistoryOnStart>
+    </rollingPolicy>
+    <encoder>
+      <charset>UTF-8</charset>
+      <!-- <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%X{jobid}] ${LOG_LEVEL_PATTERN:-%5p} %logger : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern> -->
+      <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS,Asia/Tokyo} [%X{jobid}] ${LOG_LEVEL_PATTERN:-%5p} %logger : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}</pattern>
+    </encoder>
+  </appender>
+  <!-- 4-1.ロギングイベントをBlockingQueueに蓄積させる。 -->
+  <appender name="ASYNC_APPLICATION_LOG_FILE" class="ch.qos.logback.classic.AsyncAppender">
+    <appender-ref ref="APPLICATION_LOG_FILE"/>
+  </appender>
+  <!-- 5.ロガー設定 -->
+  <logger name="org" level="INFO" />
+  <logger name="com.example.demo" level="DEBUG" />
+  <root level="INFO">
+     <appender-ref ref="APPLICATION_CONSOLE_LOG"/>
+     <appender-ref ref="ASYNC_APPLICATION_LOG_FILE"/>
+  </root>
+</configuration>

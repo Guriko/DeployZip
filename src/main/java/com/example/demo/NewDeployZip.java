@@ -6,16 +6,19 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.codehaus.plexus.archiver.tar.TarEntry;
+import org.codehaus.plexus.archiver.tar.TarInputStream;
 import org.slf4j.LoggerFactory;
 
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class NewDeployZip {
-	
+
 	public org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public void runLog(IOException error) {
@@ -23,7 +26,7 @@ public class NewDeployZip {
 	}
 
 	public void zipIf(File Folder) {
-		
+
 		// Zipファイルの展開先
 		File destinationDir;
 
@@ -49,67 +52,39 @@ public class NewDeployZip {
 
 					// Zipファイルの展開先
 					destinationDir = crFile;
+					this.zipDep(destinationDir, fileZip,list[i].getName(),Folder);
 
-					try(FileInputStream fis = new FileInputStream(fileZip);
-							BufferedInputStream bis = new BufferedInputStream(fis);
-							ZipInputStream zis = new ZipInputStream(bis);
-							) {
-						ZipEntry zipEntry;
-						while((zipEntry = zis.getNextEntry()) != null) {
 
-							if(zipEntry.isDirectory()) {
-								System.out.println("ディレクトリです" + zipEntry);
-								File getZipEnt = new File(zipEntry.getName());
-								File crDir = new File(destinationDir + "//" + getZipEnt.getName());
-								crDir.mkdir();
+				}else if(list[i].getName().endsWith("tar.gz")) {
+					System.out.println(list[i].getName());
 
-								destinationDir = crDir;
-								System.out.println("作成し中を見ます" + destinationDir);
-								this.zipIf(destinationDir);
-							}
-							else {
+					//　展開するtar.gzファイル
+					String fileGz = Folder + "//" + list[i].getName();
 
-								File getZipEnt = new File(zipEntry.getName());
+					File crFile = new File(Folder + "//" + this.getPreffix(list[i].getName()));
+					crFile.mkdir();
 
-								try(FileOutputStream fos = new FileOutputStream(destinationDir + "//" + getZipEnt.getName());
-										BufferedOutputStream bos = new BufferedOutputStream(fos);
-										){
-									byte[] data = new byte[1024];
-									int count = 0;
-									while((count = zis.read(data)) != -1){
-										bos.write(data,0,count);
-									}
-								}
-							}
-						}
-
-//						this.zipIf(destinationDir);
-
-					} catch (IOException e) {
-						this.runLog(e);
-						
-						//　エラー時にエラーフォルダ作成
-						File errFolder = new File(Folder + "//errorFolder");
-						if(!errFolder.exists()) {
-							errFolder.mkdir();
-						}
-
-						//　エラー発生したzipファイルをエラーフォルダに移動
-						File from = new File(fileZip);
-						File to = new File(errFolder + "//" + list[i].getName());
-						this.moveFile(from,to);
-
-					} finally {
-						File delZip = new File(fileZip);
-						delZip.delete();
-					}
+					// tar.gzファイルの展開先
+					destinationDir = crFile;
+					this.tarDep(destinationDir,fileGz,list[i].getName(),Folder);
 				}
 			}
 		}
 	}
 
 
-	
+
+	//　エラーフォルダに退避させる
+	private void moveErr(File err,String fileZip,File toFile) {
+		if(!err.exists()) {
+			err.mkdir();
+		}
+
+		//　エラー発生したzipファイルをエラーフォルダに移動
+		File from = new File(fileZip);
+		File to = new File(err + "//" + toFile);
+		this.moveFile(from,to);
+	}
 
 
 	//Fileの移動メソッド
@@ -129,5 +104,95 @@ public class NewDeployZip {
 
 		return fileName;
 	}
+
+	public void zipDep(File destinationDir,String fileZip,String list,File Folder) {
+		try(FileInputStream fis = new FileInputStream(fileZip);
+				BufferedInputStream bis = new BufferedInputStream(fis);
+				ZipInputStream zis = new ZipInputStream(bis);
+				) {
+			ZipEntry zipEntry;
+			while((zipEntry = zis.getNextEntry()) != null) {
+
+				if(zipEntry.isDirectory()) {
+
+					System.out.println("ディレクトリです" + zipEntry.getName());
+					File getZipEnt = new File(zipEntry.getName());
+					File crDir = new File(destinationDir,getZipEnt.getName());
+					crDir.mkdir();
+
+					destinationDir = crDir;
+					this.zipIf(destinationDir);
+
+				} else {
+					System.out.println("ファイルです" + zipEntry);
+					File getZipEnt = new File(zipEntry.getName());
+
+					try(FileOutputStream fos = new FileOutputStream(destinationDir + "//" + getZipEnt.getName());
+							BufferedOutputStream bos = new BufferedOutputStream(fos);
+							){
+						byte[] data = new byte[1024];
+						int count = 0;
+						while((count = zis.read(data)) != -1){
+							bos.write(data,0,count);
+						}
+					}
+
+				}
+			}
+		} catch (IOException e) {
+			this.runLog(e);
+
+			//　エラー時にエラーフォルダ作成
+			File errFolder = new File(Folder + "//errorFolder");
+			File to = new File(errFolder + "//" + list);
+			this.moveErr(errFolder, fileZip, to);
+
+		} finally {
+			File delZip = new File(fileZip);
+			delZip.delete();
+		}
+	}
+	
+	//tar.gzの解凍
+	public void tarDep(File destinationDir,String fileGz,String list,File Folder) {
+		try(FileInputStream fis = new FileInputStream(fileGz);
+				BufferedInputStream bis = new BufferedInputStream(fis);
+				TarInputStream tin = new TarInputStream(new GZIPInputStream(bis));
+				) {
+			TarEntry tarEnt;
+			while ((tarEnt = tin.getNextEntry()) != null) {
+				if(tarEnt.isDirectory()) {
+
+					System.out.println("ディレクトリです" + tarEnt.getName());
+					File gettarEnt = new File(tarEnt.getName());
+					File crDir = new File(destinationDir,gettarEnt.getName());
+					crDir.mkdir();
+
+					destinationDir = crDir;
+					this.zipIf(destinationDir);
+
+				} else {
+					File gettarEnt = new File(tarEnt.getName());
+					try(FileOutputStream fos = new FileOutputStream(destinationDir + "//" + gettarEnt.getName());
+							BufferedOutputStream bos = new BufferedOutputStream(fos);
+							){
+						byte[] data = new byte[1024];
+						int count = 0;
+						while((count = tin.read(data)) != -1){
+							bos.write(data,0,count);
+						}
+					}
+				}
+			}
+		}catch(IOException e) {
+			this.runLog(e);
+
+			//　エラー時にエラーフォルダ作成
+			File errFolder = new File(Folder + "//errorFolder");
+			File to = new File(errFolder + "//" + list);
+			this.moveErr(errFolder, fileGz, to);
+		}
+	}
 }
+
 

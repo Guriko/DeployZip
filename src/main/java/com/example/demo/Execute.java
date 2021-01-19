@@ -8,10 +8,10 @@ import java.io.IOException;
 public class Execute {
 	public static void main(String[] args) throws IOException{
 		
-		//FileƒNƒ‰ƒX‚ÌƒIƒuƒWƒFƒNƒg‚ğ¶¬‚µ‘ÎÛ‚ÌƒfƒBƒŒƒNƒgƒŠ‚ğw’è
+		//Fileã‚¯ãƒ©ã‚¹ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç”Ÿæˆã—å¯¾è±¡ã®ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã‚’æŒ‡å®š
 		File dir = new File(args[0]);
 		
-		//@ƒCƒ“ƒXƒ^ƒ“ƒXì¬
+		//ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ä½œæˆ
 		NewDeployZip deployZip = new NewDeployZip();
 		
 		deployZip.zipIf(dir);

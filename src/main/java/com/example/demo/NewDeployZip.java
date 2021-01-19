@@ -22,15 +22,15 @@ public class NewDeployZip {
 	public org.slf4j.Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	public void runLog(IOException error) {
-		logger.error("ƒGƒ‰[“à—e:" + error);
+		logger.error("ã‚¨ãƒ©ãƒ¼å†…å®¹:" + error);
 	}
 
 	public void zipIf(File Folder) {
 
-		// Zipƒtƒ@ƒCƒ‹‚Ì“WŠJæ
+		// Zipãƒ•ã‚¡ã‚¤ãƒ«ã®å±•é–‹å…ˆ
 		File destinationDir;
 
-		//listFiles‚ğg—p‚µ‚Äƒtƒ@ƒCƒ‹ˆê——‚ğæ“¾
+		//listFilesã‚’ä½¿ç”¨ã—ã¦ãƒ•ã‚¡ã‚¤ãƒ«ä¸€è¦§ã‚’å–å¾—
 		File[] list = Folder.listFiles();
 
 		for(int i=0; i<list.length; i++) {
@@ -43,14 +43,14 @@ public class NewDeployZip {
 
 				if (list[i].getName().contains(".zip")){
 
-					//@“WŠJ‚·‚ézipƒtƒ@ƒCƒ‹
+					//ã€€å±•é–‹ã™ã‚‹zipãƒ•ã‚¡ã‚¤ãƒ«
 					String fileZip = Folder + "//" + list[i].getName();
 
-					// Zipƒtƒ@ƒCƒ‹–¼‚ÅƒtƒHƒ‹ƒ_‚ğì¬
+					// Zipãƒ•ã‚¡ã‚¤ãƒ«åã§ãƒ•ã‚©ãƒ«ãƒ€ã‚’ä½œæˆ
 					File crFile = new File(Folder + "//" + this.getPreffix(list[i].getName()));
 					crFile.mkdir();
 
-					// Zipƒtƒ@ƒCƒ‹‚Ì“WŠJæ
+					// Zipãƒ•ã‚¡ã‚¤ãƒ«ã®å±•é–‹å…ˆ
 					destinationDir = crFile;
 					this.zipDep(destinationDir, fileZip,list[i].getName(),Folder);
 
@@ -58,13 +58,13 @@ public class NewDeployZip {
 				}else if(list[i].getName().endsWith("tar.gz")) {
 					System.out.println(list[i].getName());
 
-					//@“WŠJ‚·‚étar.gzƒtƒ@ƒCƒ‹
+					//ã€€å±•é–‹ã™ã‚‹tar.gzãƒ•ã‚¡ã‚¤ãƒ«
 					String fileGz = Folder + "//" + list[i].getName();
 
 					File crFile = new File(Folder + "//" + this.getPreffix(list[i].getName()));
 					crFile.mkdir();
 
-					// tar.gzƒtƒ@ƒCƒ‹‚Ì“WŠJæ
+					// tar.gzãƒ•ã‚¡ã‚¤ãƒ«ã®å±•é–‹å…ˆ
 					destinationDir = crFile;
 					this.tarDep(destinationDir,fileGz,list[i].getName(),Folder);
 				}
@@ -74,25 +74,25 @@ public class NewDeployZip {
 
 
 
-	//@ƒGƒ‰[ƒtƒHƒ‹ƒ_‚É‘Ş”ğ‚³‚¹‚é
+	//ã€€ã‚¨ãƒ©ãƒ¼ãƒ•ã‚©ãƒ«ãƒ€ã«é€€é¿ã•ã›ã‚‹
 	private void moveErr(File err,String fileZip,File toFile) {
 		if(!err.exists()) {
 			err.mkdir();
 		}
 
-		//@ƒGƒ‰[”­¶‚µ‚½zipƒtƒ@ƒCƒ‹‚ğƒGƒ‰[ƒtƒHƒ‹ƒ_‚ÉˆÚ“®
+		//ã€€ã‚¨ãƒ©ãƒ¼ç™ºç”Ÿã—ãŸzipãƒ•ã‚¡ã‚¤ãƒ«ã‚’ã‚¨ãƒ©ãƒ¼ãƒ•ã‚©ãƒ«ãƒ€ã«ç§»å‹•
 		File from = new File(fileZip);
 		File to = new File(err + "//" + toFile);
 		this.moveFile(from,to);
 	}
 
 
-	//File‚ÌˆÚ“®ƒƒ\ƒbƒh
+	//Fileã®ç§»å‹•ãƒ¡ã‚½ãƒƒãƒ‰
 	private void moveFile(File from,File to) {
 		from.renameTo(to);
 	}
 
-	//@Šg’£q‘O‚Ìƒtƒ@ƒCƒ‹–¼‚ğ’Šo‚·‚é
+	//ã€€æ‹¡å¼µå­å‰ã®ãƒ•ã‚¡ã‚¤ãƒ«åã‚’æŠ½å‡ºã™ã‚‹
 	private String getPreffix(String fileName) {
 		if (fileName == null) {
 			return null;
@@ -105,6 +105,7 @@ public class NewDeployZip {
 		return fileName;
 	}
 
+	//Zipãƒ•ã‚¡ã‚¤ãƒ«è§£å‡
 	public void zipDep(File destinationDir,String fileZip,String list,File Folder) {
 		try(FileInputStream fis = new FileInputStream(fileZip);
 				BufferedInputStream bis = new BufferedInputStream(fis);
@@ -115,7 +116,7 @@ public class NewDeployZip {
 
 				if(zipEntry.isDirectory()) {
 
-					System.out.println("ƒfƒBƒŒƒNƒgƒŠ‚Å‚·" + zipEntry.getName());
+					System.out.println("ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã§ã™" + zipEntry.getName());
 					File getZipEnt = new File(zipEntry.getName());
 					File crDir = new File(destinationDir,getZipEnt.getName());
 					crDir.mkdir();
@@ -124,7 +125,7 @@ public class NewDeployZip {
 					this.zipIf(destinationDir);
 
 				} else {
-					System.out.println("ƒtƒ@ƒCƒ‹‚Å‚·" + zipEntry);
+
 					File getZipEnt = new File(zipEntry.getName());
 
 					try(FileOutputStream fos = new FileOutputStream(destinationDir + "//" + getZipEnt.getName());
@@ -142,7 +143,7 @@ public class NewDeployZip {
 		} catch (IOException e) {
 			this.runLog(e);
 
-			//@ƒGƒ‰[‚ÉƒGƒ‰[ƒtƒHƒ‹ƒ_ì¬
+			//ã€€ã‚¨ãƒ©ãƒ¼æ™‚ã«ã‚¨ãƒ©ãƒ¼ãƒ•ã‚©ãƒ«ãƒ€ä½œæˆ
 			File errFolder = new File(Folder + "//errorFolder");
 			File to = new File(errFolder + "//" + list);
 			this.moveErr(errFolder, fileZip, to);
@@ -153,7 +154,7 @@ public class NewDeployZip {
 		}
 	}
 	
-	//tar.gz‚Ì‰ğ“€
+	//tar.gzã®è§£å‡
 	public void tarDep(File destinationDir,String fileGz,String list,File Folder) {
 		try(FileInputStream fis = new FileInputStream(fileGz);
 				BufferedInputStream bis = new BufferedInputStream(fis);
@@ -163,7 +164,7 @@ public class NewDeployZip {
 			while ((tarEnt = tin.getNextEntry()) != null) {
 				if(tarEnt.isDirectory()) {
 
-					System.out.println("ƒfƒBƒŒƒNƒgƒŠ‚Å‚·" + tarEnt.getName());
+					System.out.println("ãƒ‡ã‚£ãƒ¬ã‚¯ãƒˆãƒªã§ã™" + tarEnt.getName());
 					File gettarEnt = new File(tarEnt.getName());
 					File crDir = new File(destinationDir,gettarEnt.getName());
 					crDir.mkdir();
@@ -187,7 +188,7 @@ public class NewDeployZip {
 		}catch(IOException e) {
 			this.runLog(e);
 
-			//@ƒGƒ‰[‚ÉƒGƒ‰[ƒtƒHƒ‹ƒ_ì¬
+			//ã€€ã‚¨ãƒ©ãƒ¼æ™‚ã«ã‚¨ãƒ©ãƒ¼ãƒ•ã‚©ãƒ«ãƒ€ä½œæˆ
 			File errFolder = new File(Folder + "//errorFolder");
 			File to = new File(errFolder + "//" + list);
 			this.moveErr(errFolder, fileGz, to);
